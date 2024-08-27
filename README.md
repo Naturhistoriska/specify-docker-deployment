@@ -1,72 +1,72 @@
 # specify-docker-deployment
 
-This Specify7 deployment is based on the recommended docker based deployment from the 
-Specify Collections Consortium. It is available at https://github.com/Specify/docker-compositions/ and should be referred to for application configuration.
+This project provides an Ansible playbook for deploying [Specify7](https://www.specifysoftware.org/products/specify-7/), a web-based biological collections data management platform. It leverages Docker for deployment based on the recommended setup by the Specify Collections Consortium. For application configuration, refer to the official repository: [Specify Docker Compositions](https://github.com/Specify/docker-compositions/).
 
-The Specify7 application and database are deployed as docker services on 2 diffrent virtual machines.
+The Specify7 application and its database are managed as Docker services using the Ansible playbook in this repository. The project contains Ansible playbooks and roles to configure the application, database, and reverse proxy. It supports the deployment and management of multiple Specify7 instances on the same or different hosts, with each instance having its own configuration settings (e.g., database names, domain names, asset folders, and cron job schedules).
 
-## Database
-On the virutal machine where the database server is to be deployed create folder structure as below.
+## Project Structure
+
+- **Inventory Files**: Configurations for each Specify7 instance are stored in inventory files located in the **inventories** folder. To install a new Specify7 instance, copy an existing inventory file, modify it as necessary, and save it with a new name.
+
+- **Ansible Vault**: Sensitive data like database credentials are stored in an Ansible vault located at **group_vars/all/vault.yml**. You can edit this vault file using the following command:
+```bash
+export EDITOR=nano; ansible-vault edit ansible/group_vars/all/vault.yml
+ ```
+## Setting Up the Database
+
+To set up a database for a specific Specify7 instance, run the specify-db.yml playbook, specifying the appropriate inventory file. This playbook will execute the specify_db role.
 ```
-data
-├── backups
-├── code
-└── volumes
-    └── database
+ansible-playbook --ask-become-pass --ask-vault-pass -i inventories/demo.ini specify-db.yml
 ```
-Copy the folder **db** into the application server's **/data/code/** directory.
+### Tasks Performed
+- Retrieve and configure secret variables specific to the Specify7 database instance.
+- Create the required directory structure on the host.
+- Copy environment files.
+- Set up the Docker Compose file.
+- Configure backup scripts.
+- Schedule a crontab job for backups.
 
-In the server, create **env/.env_file** file by copying the **env/env_file.template** file.
+**Note:** If seeding the database from a previous export, place the SQL dump in the /data/code/specify_instance/seed-database/ directory.
 
-Edit the **env/.env_file** and set appropriate values.
-
-If the database is to be seeded from an existing database export, copy the previous database dexportump in SQL format into the **/data/code/db/seed-database** directory.
-
-To start the service navigate to /data/code/db folder and execute 
+To start the database service, navigate to the /data/code/specify_instance/ directory and run:
 ```
 docker-compose up -d 
 ```
 
-## Application
-On the virutal machine where the Specify application is to be deployed create folder structure as below.
+## Setting Up the Specify7 Application
+To configure the Specify7 application for a given instance, run the specify-app.yml playbook, specifying the relevant inventory file. This playbook executes the specify_db role.
 ```
-data
-├── backups
-├── code
-└── volumes
-    ├── attachments
-    ├── specify6
-    └── static-files
+ansible-playbook --ask-become-pass --ask-vault-pass -i inventories/demo.ini specify-app.yml
 ```
-The Specify7 application running in Docker is configured to run under a user/group  **specify** with UID/GID **999**.
-So the ownership of the 3 folders under volumes should be changed to **999**.
-```
-chown -R 999:999 /data/volumes/attachments /data/volumes/specify6 /data/volumes/static-files
-```
-Copy the folder **app** into the application server's **/data/code/** directory.
+### Tasks Performed
+- Retrieve and configure secret variables specific to the Specify7 application instance.
+- Dynamically create the application environment.
+- Create the necessary directory structure on the host.
+- Copy environment files.
+- Install required libraries.
+- Set up the Docker Compose file.
 
-Copy SSL certificate and key into **/data/code/app/certs** direcory. 
+## Setting Up Reverse Proxy / Webserver
+To configure a reverse proxy or webserver using Nginx, run the nginx-webserver.yml playbook with the relevant inventory file. This playbook will execute the nginx-webserver role.
+```
+ansible-playbook --ask-become-pass --ask-vault-pass -i inventories/demo.ini specify-app.yml
+```
+### Tasks Performed
+- Create the necessary directory structure on the host.
+- Copy configuration files.
+- Set up the Docker Compose file.
+- Manage volume definitions in the compose file for shared usage.
 
-In the server change the file permissions of the SSL certificate, key and the folder containing them appropriately.
+**Note:** SSL certificates are not included in this project. They should be manually copied into the /data/code/app/certs directory. Afterward, change the file permissions appropriately
  ```
-chmod 644 specify.nrm.se.crt 
-chmod 600 specify.nrm.se.key 
+chmod 644 *.crt
+chmod 600 *.key
 chmod 700 certs
 ```
 
-In the server, create **env/.env_file** file by copying the **env/env_file.template** file.
-
-Edit the **env/.env_file**  and set the appropriate values.
-
-To start the service navigate to /data/code/db folder and execute 
-```
-docker-compose up -d 
-```
-
-## Notes
-The SSL certificate, key and .env_file should **NOT** be checked into git unencrypted.
-
-MySQL default port **3306** should to be opened between the two virtual machines to allow the application to connect to the database.
-
-HTTP and HTTPS Port **80** and **443** should be opened on the application server.
-
+## Additional Notes
+- To enable connections between the Specify7 application and its database, ensure the port specified in the db_port_on_host variable (found in the inventory files) is open on the relevant host machines.
+- The domain names specified in the domain variable (found in the inventory files) must be registered with the appropriate DNS entries pointing to the application server.
+- Ensure HTTP (port 80) and HTTPS (port 443) are open on the application server.
+- Do not check in the SSL certificates, key files, and .env files into version control unencrypted.
+  
