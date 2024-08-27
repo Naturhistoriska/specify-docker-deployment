@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mariadb-{{ specify_instance }}:
+    restart: unless-stopped
+    image: mariadb:10.11
+    container_name: mariadb-{{ specify_instance }}
+    command: --max_allowed_packet=10737418240
+    volumes:
+      - database-{{ specify_instance }}:/var/lib/mysql
+      - ./seed-database:/docker-entrypoint-initdb.d
+    env_file: ./env/.env_{{ specify_instance }}
+    ports:
+      - {{ db_port_on_host }}:3306
+
+volumes:
+  database-{{ specify_instance }}:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/volumes/database/{{ specify_instance }}

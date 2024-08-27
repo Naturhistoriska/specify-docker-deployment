@@ -1,0 +1,8 @@
+- name: "Setup database server"
+  hosts: db_servers
+  become: true
+  gather_facts: false
+  vars_files:
+    - group_vars/all/vault.yml
+  roles:
+    - role: roles/specify_db

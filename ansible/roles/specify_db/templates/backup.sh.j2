@@ -1,0 +1,14 @@
+#!/bin/bash
+
+SPECIFY_INSTANCE={{ specify_instance }}
+CONTAINER_NAME=mariadb-{{ specify_instance }}
+DB_NAME={{ database_name }}
+HOST_BACKUP_FOLDER=/data/backups/{{ specify_instance }}
+NOW=$(date +%Y%m%d-%H%M%S)
+
+echo "== service: $CONTAINER_NAME, db: $DB_NAME, date: $NOW"
+
+docker exec $CONTAINER_NAME bash -c "mysqldump -u root -p\$MYSQL_ROOT_PASSWORD $DB_NAME" | gzip > $HOST_BACKUP_FOLDER/$SPECIFY_INSTANCE-$DB_NAME-$NOW.sql.gz
+
+echo "- Done: $(date)"
+echo
