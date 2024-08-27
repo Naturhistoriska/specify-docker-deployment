@@ -1,0 +1,74 @@
+version: '3.8'
+
+networks:
+  default:
+    external: true
+    name: specify_network
+
+services:
+
+  specify7-{{ specify_instance }}:
+    restart: unless-stopped
+    image: specifyconsortium/specify7-service:v7
+    init: true
+    volumes:
+      - "specify6-{{ specify_instance }}:/opt/Specify:ro"
+      - "static-files-{{ specify_instance }}:/volumes/static-files"
+    env_file: ./env/.env_file_{{ specify_instance }}
+    extra_hosts:
+      - "{{ domain }}:host-gateway"
+
+  specify7-worker-{{ specify_instance }}:
+    restart: unless-stopped
+    image: specifyconsortium/specify7-service:v7
+    command: ve/bin/celery -A specifyweb worker -l INFO --concurrency=1
+    init: true
+    volumes:
+      - "specify6-{{ specify_instance }}:/opt/Specify:ro"
+      - "static-files-{{ specify_instance }}:/volumes/static-files"
+    env_file: ./env/.env_file_{{ specify_instance }}
+    extra_hosts:
+      - "{{ domain }}:host-gateway"
+
+  asset-server-{{ specify_instance }}:
+    restart: unless-stopped
+    image: specifyconsortium/specify-asset-service
+    init: true
+    volumes:
+      - "attachments-{{ specify_instance }}:/home/specify/attachments"
+    env_file: ./env/.env_file_{{ specify_instance }}
+
+  specify6-{{ specify_instance }}:
+    image: specifyconsortium/specify6-service:6.8.03
+    volumes:
+      - "specify6-{{ specify_instance }}:/volumes/Specify"
+
+  report-runner-{{ specify_instance }}:
+    restart: unless-stopped
+    image: specifyconsortium/report-runner
+    volumes:
+      - "./lib/fonts-all.jar:/var/lib/jetty/webapps/ROOT/WEB-INF/lib/fonts-all.jar"
+
+  redis-{{ specify_instance }}:
+    restart: unless-stopped
+    image: redis:6.0
+
+volumes:
+  attachments-{{ specify_instance }}: # the asset-servers attachment files
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/volumes/attachments/{{ specify_instance }}"
+  specify6-{{ specify_instance }}: # provides Specify 6 files to Specify 7 and the web server
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/volumes/specify6/{{ specify_instance }}"
+  static-files-{{ specify_instance }}: # provides Specify 7 static files to the web server
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/volumes/static-files/{{ specify_instance }}"

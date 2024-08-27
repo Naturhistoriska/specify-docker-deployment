@@ -1,0 +1,21 @@
+#DATABASE_HOST={{ groups['db_servers'][0] }}.nrm.se
+DATABASE_HOST={{ db_host_ip }}
+DATABASE_PORT={{ db_port_on_host }}
+DATABASE_NAME={{ database }}
+MASTER_NAME={{ master_user }}
+MASTER_PASSWORD={{ master_password }}
+
+SECRET_KEY={{ secret_key }}
+ASSET_SERVER_URL=https://{{ domain }}/web_asset_store.xml
+ASSET_SERVER_KEY={{ asset_server_key }}
+REPORT_RUNNER_HOST=report-runner-{{ specify_instance }}
+REPORT_RUNNER_PORT=8080
+CELERY_BROKER_URL=redis://redis-{{ specify_instance }}/0
+CELERY_RESULT_BACKEND=redis://redis-{{ specify_instance }}/1
+LOG_LEVEL=WARNING
+SP7_DEBUG=false
+
+SERVER_NAME={{ domain }}
+SERVER_PORT=80
+ATTACHMENT_KEY={{ asset_server_key }}
+DEBUG_MODE=false

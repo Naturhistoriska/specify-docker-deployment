@@ -1,0 +1,53 @@
+- name: Get secrets based on specify_instance
+  set_fact:
+    database: "{{ installation[specify_instance].database }}"
+    master_user: "{{ installation[specify_instance].master_user }}"
+    master_password: "{{ installation[specify_instance].master_password }}"
+    secret_key: "{{ installation[specify_instance].secret_key }}"
+    asset_server_key: "{{ installation[specify_instance].asset_server_key }}"
+    db_host_ip: "{{ installation[specify_instance].db_host_ip }}"
+
+- name: Create directory structure on app host
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - /data/backups/{{ specify_instance }}
+    - /data/code/{{ specify_instance }}
+    - /data/code/{{ specify_instance }}/env
+    - /data/code/{{ specify_instance }}/lib
+    - /data/volumes/attachments/{{ specify_instance }}
+    - /data/volumes/specify6/{{ specify_instance }}
+    - /data/volumes/static-files/{{ specify_instance }}
+  tags:
+    - directory_structure_app
+
+- name: Install env files
+  template:
+    src: env_file.template.j2
+    dest: /data/code/{{ specify_instance }}/env/.env_file_{{ specify_instance }}
+    owner: root
+    group: docker
+    mode: 0640
+  tags:
+    - env_files_app
+
+- name: Install external lib files
+  copy:
+    src: fonts-all.jar
+    dest: /data/code/{{ specify_instance }}/lib/fonts-all.jar
+    mode: 0755
+  tags:
+    - external_lib
+
+- name: Install docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /data/code/{{ specify_instance }}/docker-compose.yml
+    owner: root
+    group: docker
+    mode: 0664
+  tags:
+    - deploy_db
+    - docker_compose_db
