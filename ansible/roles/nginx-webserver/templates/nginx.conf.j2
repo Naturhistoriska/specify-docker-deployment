@@ -1,0 +1,55 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{ domain }};
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name {{ domain }};
+    
+    ssl_certificate /etc/nginx/certs/{{ domain }}.crt;
+    ssl_certificate_key /etc/nginx/certs/{{ domain }}.key;
+    include includes/ssl.conf;
+
+    root /usr/share/nginx;
+
+    # serve static files directly
+    location /static/ {
+        root /volumes;
+        rewrite ^/static/config/(.*)$ /specify6-{{ specify_instance }}/config/$1 break;
+        rewrite ^/static/depository/(.*)$ /static-files-{{ specify_instance }}/depository/$1 break;
+        rewrite ^/static/(.*)$ /static-files-{{ specify_instance }}/frontend-static/$1 break;
+    }
+
+    location = /web_asset_store.xml {
+        proxy_pass http://asset-server-{{ specify_instance }}:8080/web_asset_store.xml;
+        sub_filter 'http://{{ domain }}:80' 'https://{{ domain }}';
+        sub_filter_once off;
+        sub_filter_types text/xml;
+    }
+
+    # proxy these urls to the asset server
+    location ~ ^/(fileget|fileupload|filedelete|getmetadata|testkey|web_asset_store.xml) {
+        client_max_body_size 0;
+        resolver 127.0.0.11 valid=30s;
+        proxy_set_header X-Forwarded-Proto $https;
+        set $backend "http://asset-server-{{ specify_instance }}:8080";
+        proxy_pass $backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location / {
+        resolver 127.0.0.11 valid=30s;
+        proxy_set_header X-Forwarded-Proto $https;
+        set $backend "http://specify7-{{ specify_instance }}:8000";
+        proxy_pass $backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}

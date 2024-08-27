@@ -1,0 +1,27 @@
+version: '3.8'
+
+networks:
+  default:
+    external: true
+    name: specify_network
+
+services:
+  proxy:
+    restart: unless-stopped
+    image: nginxproxy/nginx-proxy:1.5.2
+    #image: nginx:1.26.0-perl
+    init: true
+    environment:
+      - TZ=Europe/Stockholm
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+      - ./includes:/etc/nginx/includes
+      - ./conf.d:/etc/nginx/conf.d
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      #volume declarations
+
+volumes:
+#volume definitions

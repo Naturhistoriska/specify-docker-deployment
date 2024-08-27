@@ -1,0 +1,9 @@
+- name: "Setup NGINX"
+  hosts: app_servers
+  become: true
+  gather_facts: false
+  vars_files:
+    - group_vars/all/vault.yml
+  roles:
+    - role: roles/nginx-webserver
+

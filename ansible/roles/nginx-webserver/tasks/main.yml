@@ -1,0 +1,90 @@
+- name: Create necessary directory structure
+  become: true
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: docker
+    mode: 0775
+    state: directory
+  with_items:
+    - "/data/code/webserver"
+    - "/data/code/webserver/certs"
+    - "/data/code/webserver/conf.d"
+    - "/data/code/webserver/includes"
+  tags:
+    - webserver_app_directory
+
+- name: Install includes
+  become: true
+  copy:
+    src: includes/
+    dest: "/data/code/webserver/includes/"
+    owner: root
+    group: docker
+    mode: 0664
+  tags:
+    - include_configs
+
+- name: Install nginx conf for {{ specify_instance }}
+  become: true
+  template:
+    src: nginx.conf.j2
+    dest: "/data/code/webserver/conf.d/{{ specify_instance }}.conf"
+    owner: root
+    group: docker
+    mode: 0664
+  tags:
+    - nginx_conf_file
+
+- name: Install docker compose
+  become: true
+  copy:
+    src: docker-compose.yml
+    dest: "/data/code/webserver/docker-compose.yml"
+    owner: root
+    group: docker
+    mode: 0664
+    force: true
+  tags:
+    - docker_compose
+
+- name: Insert a line after a specific pattern
+  lineinfile:
+    path: /data/code/webserver/docker-compose.yml
+    line: "      - static-files-{{ specify_instance }}:/volumes/static-files-{{ specify_instance }}:ro"
+    insertafter: "#volume declarations"
+
+- name: Insert another line after a specific pattern
+  lineinfile:
+    path: /data/code/webserver/docker-compose.yml
+    line: "      - specify6-{{ specify_instance }}:/volumes/specify6-{{ specify_instance }}:ro"
+    insertafter: "#volume declarations"
+
+- name: Install temp volume def file "volume_definitions-{{ specify_instance }}.yml"
+  become: true
+  template:
+    src: volume_definitions.yml.j2
+    dest: "/data/code/webserver/volume_definitions-{{ specify_instance }}.yml"
+    owner: root
+    group: docker
+    mode: 0664
+  tags:
+    - volume_definitions_temp
+
+- name: Append content of "volume_definitions-{{ specify_instance }}.yml" to volumes.yml
+  ansible.builtin.shell:
+    cmd: cat /data/code/webserver/volume_definitions-{{ specify_instance }}.yml >> /data/code/webserver/volumes.yml
+
+- name: Append content of generated volumes.yml to docker-compose.yml
+  ansible.builtin.shell:
+    cmd: cat /data/code/webserver/volumes.yml >> /data/code/webserver/docker-compose.yml
+
+- name: Remove temp volume definition file for "{{ specify_instance }}"
+  ansible.builtin.file:
+    path: /data/code/webserver/volume_definitions-{{ specify_instance }}.yml
+    state: absent
+
+- name: Remove volumes.yml file 
+  ansible.builtin.file:
+    path: /data/code/webserver/volumes.yml
+    state: absent

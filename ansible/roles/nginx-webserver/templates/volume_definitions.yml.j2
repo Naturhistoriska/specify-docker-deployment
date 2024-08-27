@@ -1,0 +1,14 @@
+
+  specify6-{{ specify_instance }}:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/volumes/specify6/{{ specify_instance }}"
+      
+  static-files-{{ specify_instance }}:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "/data/volumes/static-files/{{ specify_instance }}"
