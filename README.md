@@ -14,7 +14,7 @@ export EDITOR=nano; ansible-vault edit ansible/group_vars/all/vault.yml
  ```
 ## Setting Up the Database
 
-To set up a database for a specific Specify7 instance, run the specify-db.yml playbook, specifying the appropriate inventory file. This playbook will execute the specify_db role.
+To set up a database for a specific Specify7 instance, run the **specify-db.yml** playbook, specifying the appropriate inventory file. This playbook will execute the **specify_db** role.
 ```
 ansible-playbook --ask-become-pass --ask-vault-pass -i inventories/demo.ini specify-db.yml
 ```
@@ -26,15 +26,15 @@ ansible-playbook --ask-become-pass --ask-vault-pass -i inventories/demo.ini spec
 - Configure backup scripts.
 - Schedule a crontab job for backups.
 
-**Note:** If seeding the database from a previous export, place the SQL dump in the /data/code/specify_instance/seed-database/ directory.
+**Note:** If seeding the database from a previous export, place the SQL dump in the */data/code/specify_instance/seed-database/* directory.
 
-To start the database service, navigate to the /data/code/specify_instance/ directory and run:
+To start the database service, navigate to the */data/code/specify_instance/* directory and run:
 ```
 docker-compose up -d 
 ```
 
 ## Setting Up the Specify7 Application
-To configure the Specify7 application for a given instance, run the specify-app.yml playbook, specifying the relevant inventory file. This playbook executes the specify_db role.
+To configure the Specify7 application for a given instance, run the **specify-app.yml** playbook, specifying the relevant inventory file. This playbook executes the **specify_db** role.
 ```
 ansible-playbook --ask-become-pass --ask-vault-pass -i inventories/demo.ini specify-app.yml
 ```
@@ -47,9 +47,9 @@ ansible-playbook --ask-become-pass --ask-vault-pass -i inventories/demo.ini spec
 - Set up the Docker Compose file.
 
 ## Setting Up Reverse Proxy / Webserver
-To configure a reverse proxy or webserver using Nginx, run the nginx-webserver.yml playbook with the relevant inventory file. This playbook will execute the nginx-webserver role.
+To configure a reverse proxy or webserver using Nginx, run the **nginx-webserver.yml** playbook with the relevant inventory file. This playbook will execute the **nginx-webserver** role.
 ```
-ansible-playbook --ask-become-pass --ask-vault-pass -i inventories/demo.ini specify-app.yml
+ansible-playbook --ask-become-pass --ask-vault-pass -i inventories/demo.ini nginx-webserver.yml
 ```
 ### Tasks Performed
 - Create the necessary directory structure on the host.
