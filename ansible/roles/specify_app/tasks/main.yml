@@ -49,5 +49,5 @@
     group: docker
     mode: 0664
   tags:
-    - deploy_db
-    - docker_compose_db
+    - deploy_app
+    - docker_compose_app
