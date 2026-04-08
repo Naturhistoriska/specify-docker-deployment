@@ -2,4 +2,4 @@
 *.crt
 **/*.key
 **/*.crt
-**/.env*
+**/vault.yml
