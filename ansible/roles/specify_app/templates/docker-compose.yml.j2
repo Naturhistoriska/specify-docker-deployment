@@ -12,11 +12,8 @@ services:
     image: specifyconsortium/specify7-service:{{ specify7_version }}
     init: true
     volumes:
-      - "specify6-{{ specify_instance }}:/opt/Specify:ro"
       - "static-files-{{ specify_instance }}:/volumes/static-files"
     env_file: ./env/.env_file_{{ specify_instance }}
-    extra_hosts:
-      - "{{ domain }}:host-gateway"
 
   specify7-worker-{{ specify_instance }}:
     restart: unless-stopped
@@ -24,11 +21,8 @@ services:
     command: ve/bin/celery -A specifyweb worker -l INFO --concurrency=1
     init: true
     volumes:
-      - "specify6-{{ specify_instance }}:/opt/Specify:ro"
       - "static-files-{{ specify_instance }}:/volumes/static-files"
     env_file: ./env/.env_file_{{ specify_instance }}
-    extra_hosts:
-      - "{{ domain }}:host-gateway"
 
   asset-server-{{ specify_instance }}:
     restart: unless-stopped
@@ -37,11 +31,6 @@ services:
     volumes:
       - "attachments-{{ specify_instance }}:/home/specify/attachments"
     env_file: ./env/.env_file_{{ specify_instance }}
-
-  specify6-{{ specify_instance }}:
-    image: specifyconsortium/specify6-service:6.8.03
-    volumes:
-      - "specify6-{{ specify_instance }}:/volumes/Specify"
 
   report-runner-{{ specify_instance }}:
     restart: unless-stopped
@@ -60,12 +49,6 @@ volumes:
       type: none
       o: bind
       device: "/data/volumes/attachments/{{ specify_instance }}"
-  specify6-{{ specify_instance }}: # provides Specify 6 files to Specify 7 and the web server
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "/data/volumes/specify6/{{ specify_instance }}"
   static-files-{{ specify_instance }}: # provides Specify 7 static files to the web server
     driver: local
     driver_opts:
