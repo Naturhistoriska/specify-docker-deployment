@@ -12,18 +12,18 @@
     mode: 0755
   loop:
     - /data/log
-    - /data/backups/{{ specify_instance }}
-    - /data/code/{{ specify_instance }}
-    - /data/code/{{ specify_instance }}/env
-    - /data/code/{{ specify_instance }}/seed-database
-    - /data/volumes/database/{{ specify_instance }}
+    - "{{ backups_root }}/{{ specify_instance }}"
+    - "{{ db_code_root }}/{{ specify_instance }}"
+    - "{{ db_code_root }}/{{ specify_instance }}/env"
+    - "{{ db_code_root }}/{{ specify_instance }}/seed-database"
+    - "{{ volumes_root }}/database/{{ specify_instance }}"
   tags:
     - directory_structure_db
 
 - name: Install env files
   template:
     src: env_file.template.j2
-    dest: /data/code/{{ specify_instance }}/env/.env_{{ specify_instance }}
+    dest: "{{ db_code_root }}/{{ specify_instance }}/env/.env_{{ specify_instance }}"
     owner: root
     group: docker
     mode: 0640
@@ -33,7 +33,7 @@
 - name: Install docker-compose file
   template:
     src: docker-compose.yml.j2
-    dest: /data/code/{{ specify_instance }}/docker-compose.yml
+    dest: "{{ db_code_root }}/{{ specify_instance }}/docker-compose.yml"
     owner: root
     group: docker
     mode: 0664
@@ -44,7 +44,7 @@
 - name: Setup backup scripts
   template:
     src: backup.sh.j2
-    dest: /data/code/{{ specify_instance }}/backupdb_{{ specify_instance }}.sh
+    dest: "{{ db_code_root }}/{{ specify_instance }}/backupdb_{{ specify_instance }}.sh"
     mode: 0775
   tags:
     - backup_script
@@ -54,6 +54,6 @@
     name: "backupdb_{{ specify_instance }}"
     minute: "{{ cron_job_minute }}"
     hour: "{{ cron_job_hour }}" # CET
-    job: "/data/code/{{ specify_instance }}/backupdb_{{ specify_instance }}.sh >> /data/log/backup_{{ specify_instance }}_nightly.log 2>&1"
+    job: "{{ db_code_root }}/{{ specify_instance }}/backupdb_{{ specify_instance }}.sh >> /data/log/backup_{{ specify_instance }}_nightly.log 2>&1"
   tags:
     - crontab_for_backup
