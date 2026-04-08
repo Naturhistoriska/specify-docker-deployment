@@ -2,20 +2,42 @@
 DATABASE_HOST={{ db_host_ip }}
 DATABASE_PORT={{ db_port_on_host }}
 DATABASE_NAME={{ database }}
+
 MASTER_NAME={{ master_user }}
 MASTER_PASSWORD={{ master_password }}
+MASTER_HOST=%
+
+MIGRATOR_NAME={{ master_user }}
+MIGRATOR_PASSWORD={{ master_password }}
+MIGRATOR_HOST=%
+
+APP_USER_NAME={{ master_user }}
+APP_USER_PASSWORD={{ master_password }}
+APP_HOST=%
 
 SECRET_KEY={{ secret_key }}
 ASSET_SERVER_URL=https://{{ domain }}/web_asset_store.xml
 ASSET_SERVER_KEY={{ asset_server_key }}
+
+REDIS_HOST=redis-{{ specify_instance }}
+REDIS_PORT=6379
+REDIS_DB_INDEX=0
+
 REPORT_RUNNER_HOST=report-runner-{{ specify_instance }}
 REPORT_RUNNER_PORT=8080
+
 CELERY_BROKER_URL=redis://redis-{{ specify_instance }}/0
 CELERY_RESULT_BACKEND=redis://redis-{{ specify_instance }}/1
+
 LOG_LEVEL=WARNING
 SP7_DEBUG=false
+SPECIFY_CONFIG_DIR=/opt/specify7/config
 
 SERVER_NAME={{ domain }}
 SERVER_PORT=80
 ATTACHMENT_KEY={{ asset_server_key }}
 DEBUG_MODE=false
+
+ALLOWED_HOSTS={{ domain }}
+CSRF_TRUSTED_ORIGINS=https://{{ domain }}
+TIME_ZONE="Europe/Stockholm"
