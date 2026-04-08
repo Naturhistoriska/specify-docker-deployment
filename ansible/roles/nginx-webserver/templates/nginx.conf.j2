@@ -19,7 +19,7 @@ server {
     # serve static files directly
     location /static/ {
         root /volumes;
-        rewrite ^/static/config/(.*)$ /specify6-{{ specify_instance }}/config/$1 break;
+        rewrite ^/static/config/(.*)$ /static-files-{{ specify_instance }}/specify-config/config/$1 break;
         rewrite ^/static/depository/(.*)$ /static-files-{{ specify_instance }}/depository/$1 break;
         rewrite ^/static/(.*)$ /static-files-{{ specify_instance }}/frontend-static/$1 break;
     }
