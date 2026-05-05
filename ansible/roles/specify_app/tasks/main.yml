@@ -6,6 +6,8 @@
     secret_key: "{{ installation[specify_instance].secret_key }}"
     asset_server_key: "{{ installation[specify_instance].asset_server_key }}"
     db_host_ip: "{{ installation[specify_instance].db_host_ip }}"
+  tags:
+    - always
 
 - name: Create directory structure on app host
   file:
