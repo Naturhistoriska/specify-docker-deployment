@@ -1,0 +1,18 @@
+installation:
+  stage:
+    root_password: stage_root_password
+    database: stage_specify_db_name
+    master_user: master_user_stage
+    master_password: secret_master_password_for_stage
+    secret_key: secret_key_for_stage
+    asset_server_key: secred_asset_server_key_for_stage
+    db_host_ip: ip_of_db_host_for_stage
+
+  demo:
+    root_password: stage_root_password
+    database: demo_specify_db_name
+    master_user: master_user_demo
+    master_password: secret_master_password_for_demo
+    secret_key: secret_key_for_demo
+    asset_server_key: secred_asset_server_key_for_demo
+    db_host_ip: ip_of_db_host_for_demo
