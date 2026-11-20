@@ -6,8 +6,9 @@ server {
 }
 
 server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
     server_name {{ domain }};
     
     ssl_certificate /etc/nginx/certs/{{ domain }}.crt;
@@ -44,6 +45,7 @@ server {
     }
 
     location / {
+        client_max_body_size {{ specify_client_max_body_size | default('1m') }};
         resolver 127.0.0.11 valid=30s;
         proxy_set_header X-Forwarded-Proto $https;
         set $backend "http://specify7-{{ specify_instance }}:8000";
