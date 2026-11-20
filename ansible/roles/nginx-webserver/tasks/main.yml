@@ -38,53 +38,11 @@
 
 - name: Install docker compose
   become: true
-  copy:
-    src: docker-compose.yml
+  template:
+    src: docker-compose.yml.j2
     dest: "{{ webserver_code_root }}/docker-compose.yml"
     owner: root
     group: docker
     mode: 0664
-    force: true
   tags:
     - docker_compose
-
-- name: Insert a line after a specific pattern
-  lineinfile:
-    path: "{{ webserver_code_root }}/docker-compose.yml"
-    line: "      - static-files-{{ specify_instance }}:/volumes/static-files-{{ specify_instance }}:ro"
-    insertafter: "#volume declarations"
-
-- name: Insert another line after a specific pattern
-  lineinfile:
-    path: "{{ webserver_code_root }}/docker-compose.yml"
-    line: "      - specify6-{{ specify_instance }}:/volumes/specify6-{{ specify_instance }}:ro"
-    insertafter: "#volume declarations"
-
-- name: Install temp volume def file "volume_definitions-{{ specify_instance }}.yml"
-  become: true
-  template:
-    src: volume_definitions.yml.j2
-    dest: "{{ webserver_code_root }}/volume_definitions-{{ specify_instance }}.yml"
-    owner: root
-    group: docker
-    mode: 0664
-  tags:
-    - volume_definitions_temp
-
-- name: Append content of "volume_definitions-{{ specify_instance }}.yml" to volumes.yml
-  ansible.builtin.shell:
-    cmd: cat {{ webserver_code_root }}/volume_definitions-{{ specify_instance }}.yml >> {{ webserver_code_root }}/volumes.yml
-
-- name: Append content of generated volumes.yml to docker-compose.yml
-  ansible.builtin.shell:
-    cmd: cat {{ webserver_code_root }}/volumes.yml >> {{ webserver_code_root }}/docker-compose.yml
-
-- name: Remove temp volume definition file for "{{ specify_instance }}"
-  ansible.builtin.file:
-    path: "{{ webserver_code_root }}/volume_definitions-{{ specify_instance }}.yml"
-    state: absent
-
-- name: Remove volumes.yml file 
-  ansible.builtin.file:
-    path: "{{ webserver_code_root }}/volumes.yml"
-    state: absent
