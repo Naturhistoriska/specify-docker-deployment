@@ -8,17 +8,13 @@ services:
     restart: unless-stopped
     image: "{{ nginx_proxy_image }}"
     init: true
-    environment:
-      - TZ=Europe/Stockholm
-      - TRUST_DOWNSTREAM_PROXY=false
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./certs:/etc/nginx/certs:ro
-      - ./includes:/etc/nginx/includes
-      - ./conf.d:/etc/nginx/conf.d
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./includes:/etc/nginx/includes:ro
+      - ./conf.d:/etc/nginx/conf.d:ro
 {% for instance in webserver_instances.split(',') %}
       - static-files-{{ instance | trim }}:/volumes/static-files-{{ instance | trim }}:ro
 {% endfor %}
